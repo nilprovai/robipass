@@ -74,7 +74,7 @@ class ProcessUtils:
     @staticmethod
     def patch_pid(pid):
         mitm = ProcessUtils.mitm_pem()
-        h = ProcessUtils.k32.OpenProcess(0x1FFFFF, False, int(pid))
+        h = ProcessUtils.k32.OpenProcess(0x1038, False, int(pid))
         if not h:
             return 0, "open fail %d" % C.get_last_error()
         try:
@@ -99,8 +99,7 @@ class ProcessUtils:
                     continue
                 a, b = slot; span = b - a
                 newblock = mitm + b"\n" * (span - len(mitm))
-                tgt = hdr_va + a; old = W.DWORD(0)
-                ProcessUtils.k32.VirtualProtectEx(h, C.c_void_p(tgt), span, 0x04, C.byref(old))
+                tgt = hdr_va + a
                 wr = C.c_size_t(0)
                 if ProcessUtils.k32.WriteProcessMemory(h, C.c_void_p(tgt), newblock, span, C.byref(wr)):
                     patched += 1
@@ -255,7 +254,7 @@ class RoBipass:
             listen_host='127.0.0.1',
             listen_port=8080,
             confdir=Config.mitm_cert_dir,
-            mode=["local:RobloxPlayerBeta.exe"],
+            mode=[f"local:{Config.target_process}"],
             allow_hosts=[Config.allow_host],
 
         )
